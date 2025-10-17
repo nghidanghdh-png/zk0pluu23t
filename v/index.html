@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Reels</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #000;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            touch-action: pan-y;
+        }
+
+        .container {
+            position: relative;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Upload Screen */
+        .upload-screen {
+            text-align: center;
+            color: white;
+        }
+
+        .upload-screen.hidden {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 96px;
+            margin-bottom: 20px;
+        }
+
+        .upload-title {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .upload-subtitle {
+            font-size: 18px;
+            color: #aaa;
+            margin-bottom: 30px;
+        }
+
+        .btn-upload {
+            background: linear-gradient(135deg, #ff006e, #8338ec);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-upload:hover {
+            transform: scale(1.05);
+        }
+
+        /* Video Player */
+        .video-container {
+            position: relative;
+            height: 100%;
+            width: 100%;
+        }
+
+        .video-container.hidden {
+            display: none;
+        }
+
+        video {
+            height: 100%;
+            width: 100%;
+            object-fit: contain;
+            background: #000;
+        }
+
+        /* Play Overlay */
+        .play-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .play-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .play-button {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .play-icon {
+            width: 0;
+            height: 0;
+            border-left: 25px solid white;
+            border-top: 15px solid transparent;
+            border-bottom: 15px solid transparent;
+            margin-left: 5px;
+        }
+
+        /* Video Count */
+        .video-count {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            font-size: 14px;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 8px 16px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            pointer-events: none;
+        }
+
+        /* Add Button - Top Right */
+        .add-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff006e, #8338ec);
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            z-index: 10;
+        }
+
+        .add-button:hover {
+            transform: scale(1.1);
+        }
+
+        /* Volume Control - Bottom Left */
+        .volume-control {
+            position: absolute;
+            left: 20px;
+            bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 12px 20px;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+        }
+
+        .volume-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .volume-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .volume-slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .volume-slider {
+            -webkit-appearance: none;
+            width: 120px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: white;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: white;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+
+        .volume-percentage {
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            min-width: 35px;
+        }
+
+        /* Auto-next Toggle - Top Left */
+        .settings-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 10;
+        }
+
+        .setting-toggle {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 12px 20px;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .setting-toggle:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .setting-label {
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            user-select: none;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 26px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 13px;
+            transition: all 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: linear-gradient(135deg, #ff006e, #8338ec);
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(22px);
+        }
+
+        /* Swipe Indicator */
+        .swipe-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 48px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .swipe-indicator.show {
+            opacity: 0.8;
+        }
+
+        /* Modal */
+        .modal {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background: #1a1a1a;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 28px;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            color: white;
+        }
+
+        .btn-add-video {
+            width: 100%;
+            background: linear-gradient(135deg, #ff006e, #8338ec);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 24px;
+        }
+
+        .video-list-title {
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .video-item {
+            background: #2a2a2a;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .video-item-name {
+            color: white;
+            font-size: 14px;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-right: 10px;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #ff006e;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+
+        .delete-btn:hover {
+            color: #ff4d94;
+        }
+
+        .btn-shuffle {
+            width: 100%;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 16px;
+        }
+
+        .btn-shuffle:hover {
+            background: #2563eb;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .loading-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 16px;
+            z-index: 5;
+        }
+
+        @media (max-width: 768px) {
+            .add-button {
+                top: 15px;
+                right: 15px;
+                width: 48px;
+                height: 48px;
+            }
+            
+            .settings-container {
+                top: 15px;
+                left: 15px;
+                gap: 10px;
+            }
+
+            .setting-toggle {
+                padding: 10px 15px;
+                gap: 10px;
+            }
+
+            .setting-label {
+                font-size: 13px;
+            }
+
+            .toggle-switch {
+                width: 42px;
+                height: 24px;
+            }
+
+            .toggle-slider {
+                width: 18px;
+                height: 18px;
+            }
+
+            .toggle-switch.active .toggle-slider {
+                transform: translateX(18px);
+            }
+            
+            .volume-control {
+                left: 15px;
+                bottom: 15px;
+                padding: 10px 15px;
+            }
+            
+            .volume-slider {
+                width: 80px;
+            }
+
+            .video-count {
+                bottom: 15px;
+                right: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Upload Screen -->
+        <div class="upload-screen" id="uploadScreen">
+            <div class="upload-icon">📱</div>
+            <div class="upload-title">Video Reels</div>
+            <div class="upload-subtitle">Tải video lên để bắt đầu lướt</div>
+            <input type="file" id="fileInput" accept="video/*" multiple>
+            <button class="btn-upload" onclick="document.getElementById('fileInput').click()">
+                📁 Chọn Video
+            </button>
+        </div>
+
+        <!-- Video Player -->
+        <div class="video-container hidden" id="videoContainer">
+            <div class="loading-text" id="loadingText" style="display: none;">Đang tải video...</div>
+            
+            <video id="videoPlayer"></video>
+            
+            <div class="swipe-indicator" id="swipeIndicator"></div>
+            
+            <div class="play-overlay" id="playOverlay" onclick="togglePlay()">
+                <div class="play-button">
+                    <div class="play-icon"></div>
+                </div>
+            </div>
+
+            <!-- Settings Container -->
+            <div class="settings-container">
+                <!-- Auto-next Toggle -->
+                <div class="setting-toggle" onclick="toggleAutoNext()">
+                    <span class="setting-label">Tự động chuyển</span>
+                    <div class="toggle-switch active" id="toggleAutoNext">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+
+                <!-- Loop Toggle -->
+                <div class="setting-toggle" onclick="toggleLoop()">
+                    <span class="setting-label">Phát lặp lại</span>
+                    <div class="toggle-switch active" id="toggleLoop">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Volume Control -->
+            <div class="volume-control">
+                <button class="volume-btn" onclick="toggleMute()" id="volumeBtn">🔊</button>
+                <div class="volume-slider-container">
+                    <input type="range" min="0" max="100" value="100" class="volume-slider" id="volumeSlider">
+                    <div class="volume-percentage" id="volumePercentage">100%</div>
+                </div>
+            </div>
+
+            <!-- Add Button -->
+            <button class="add-button" onclick="openModal()">+</button>
+
+            <div class="video-count" id="videoCount">1 / 10</div>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal" id="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title">Quản lý Video</div>
+                    <button class="close-btn" onclick="closeModal()">×</button>
+                </div>
+
+                <input type="file" id="fileInputModal" accept="video/*" multiple>
+                <button class="btn-add-video" onclick="document.getElementById('fileInputModal').click()">
+                    ➕ Thêm video mới
+                </button>
+
+                <div class="video-list-title" id="listTitle">Danh sách video (0)</div>
+                <div id="videoList"></div>
+
+                <button class="btn-shuffle" onclick="shuffleVideos()">🔀 Xáo trộn lại thứ tự</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const DB_NAME = 'VideoReelsDB';
+        const DB_VERSION = 1;
+        const STORE_NAME = 'videos';
+        let db = null;
+
+        let allVideos = [];
+        let shuffledVideos = [];
+        let currentIndex = 0;
+        let isPlaying = false;
+        let touchStartY = 0;
+        let touchEndY = 0;
+        let wheelTimeout = null;
+        let autoNextEnabled = true; // Mặc định bật tự động chuyển
+        let loopEnabled = true; // Mặc định bật phát lặp lại
+
+        const videoPlayer = document.getElementById('videoPlayer');
+        const uploadScreen = document.getElementById('uploadScreen');
+        const videoContainer = document.getElementById('videoContainer');
+        const playOverlay = document.getElementById('playOverlay');
+        const modal = document.getElementById('modal');
+        const videoCount = document.getElementById('videoCount');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeBtn = document.getElementById('volumeBtn');
+        const volumePercentage = document.getElementById('volumePercentage');
+        const swipeIndicator = document.getElementById('swipeIndicator');
+        const loadingText = document.getElementById('loadingText');
+        const toggleAutoNextBtn = document.getElementById('toggleAutoNext');
+        const toggleLoopBtn = document.getElementById('toggleLoop');
+
+        // Initialize IndexedDB
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    db = request.result;
+                    resolve(db);
+                };
+                
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                    }
+                };
+            });
+        }
+
+        // Save video to IndexedDB
+        async function saveVideoToDB(video) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.put(video);
+                
+                request.onsuccess = () => resolve();
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        // Load videos from IndexedDB
+        async function loadVideosFromDB() {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.getAll();
+                
+                request.onsuccess = () => {
+                    const videos = request.result.map(v => ({
+                        ...v,
+                        url: URL.createObjectURL(v.blob)
+                    }));
+                    resolve(videos);
+                };
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        // Delete video from IndexedDB
+        async function deleteVideoFromDB(videoId) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.delete(videoId);
+                
+                request.onsuccess = () => resolve();
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        // Toggle Auto-next
+        function toggleAutoNext() {
+            autoNextEnabled = !autoNextEnabled;
+            toggleAutoNextBtn.classList.toggle('active', autoNextEnabled);
+        }
+
+        // Toggle Loop
+        function toggleLoop() {
+            loopEnabled = !loopEnabled;
+            toggleLoopBtn.classList.toggle('active', loopEnabled);
+            videoPlayer.loop = loopEnabled;
+        }
+
+        // Initialize app
+        async function init() {
+            await initDB();
+            const savedVideos = await loadVideosFromDB();
+            
+            if (savedVideos.length > 0) {
+                allVideos = savedVideos;
+                shuffleVideos();
+                uploadScreen.classList.add('hidden');
+                videoContainer.classList.remove('hidden');
+                playCurrentVideo();
+            }
+        }
+
+        // File input handlers
+        document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+        document.getElementById('fileInputModal').addEventListener('change', handleFileUpload);
+
+        // Video events
+        videoPlayer.addEventListener('ended', () => {
+            if (autoNextEnabled && !loopEnabled) {
+                nextVideo();
+            } else if (!loopEnabled) {
+                isPlaying = false;
+                playOverlay.classList.add('show');
+            }
+            // Nếu loopEnabled = true, video sẽ tự động loop do thuộc tính loop
+        });
+        videoPlayer.addEventListener('click', togglePlay);
+
+        // Volume control
+        volumeSlider.addEventListener('input', (e) => {
+            const volume = e.target.value / 100;
+            videoPlayer.volume = volume;
+            volumePercentage.textContent = e.target.value + '%';
+            
+            if (volume === 0) {
+                volumeBtn.textContent = '🔇';
+            } else if (volume < 0.5) {
+                volumeBtn.textContent = '🔉';
+            } else {
+                volumeBtn.textContent = '🔊';
+            }
+        });
+
+        // Touch events for swipe
+        videoPlayer.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+        });
+
+        videoPlayer.addEventListener('touchmove', (e) => {
+            touchEndY = e.touches[0].clientY;
+        });
+
+        videoPlayer.addEventListener('touchend', () => {
+            const swipeDistance = touchStartY - touchEndY;
+            
+            if (Math.abs(swipeDistance) > 50) {
+                if (swipeDistance > 0) {
+                    showSwipeIndicator('▼');
+                    nextVideo();
+                } else {
+                    showSwipeIndicator('▲');
+                    previousVideo();
+                }
+            }
+        });
+
+        // Mouse wheel event
+        videoPlayer.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            
+            if (wheelTimeout) {
+                clearTimeout(wheelTimeout);
+            }
+            
+            wheelTimeout = setTimeout(() => {
+                if (e.deltaY > 0) {
+                    showSwipeIndicator('▼');
+                    nextVideo();
+                } else {
+                    showSwipeIndicator('▲');
+                    previousVideo();
+                }
+            }, 100);
+        }, { passive: false });
+
+        function showSwipeIndicator(icon) {
+            swipeIndicator.textContent = icon;
+            swipeIndicator.classList.add('show');
+            setTimeout(() => {
+                swipeIndicator.classList.remove('show');
+            }, 300);
+        }
+
+        async function handleFileUpload(e) {
+            const files = Array.from(e.target.files);
+            const videoFiles = files.filter(file => file.type.startsWith('video/'));
+            
+            if (videoFiles.length === 0) {
+                alert('Vui lòng chọn ít nhất một file video!');
+                return;
+            }
+
+            loadingText.style.display = 'block';
+
+            for (const file of videoFiles) {
+                const video = {
+                    id: Date.now() + Math.random(),
+                    name: file.name,
+                    blob: file,
+                    url: URL.createObjectURL(file)
+                };
+                
+                allVideos.push(video);
+                await saveVideoToDB(video);
+            }
+
+            loadingText.style.display = 'none';
+
+            if (shuffledVideos.length === 0) {
+                shuffleVideos();
+                uploadScreen.classList.add('hidden');
+                videoContainer.classList.remove('hidden');
+                playCurrentVideo();
+            }
+
+            updateVideoList();
+            closeModal();
+            e.target.value = '';
+        }
+
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function shuffleVideos() {
+            shuffledVideos = shuffleArray(allVideos);
+            currentIndex = 0;
+            if (shuffledVideos.length > 0) {
+                playCurrentVideo();
+            }
+            closeModal();
+        }
+
+        function playCurrentVideo() {
+            if (shuffledVideos.length === 0) return;
+
+            const video = shuffledVideos[currentIndex];
+            videoPlayer.src = video.url;
+            videoPlayer.loop = loopEnabled; // Set loop theo setting hiện tại
+            videoCount.textContent = `${currentIndex + 1} / ${shuffledVideos.length}`;
+            
+            videoPlayer.play();
+            isPlaying = true;
+            playOverlay.classList.remove('show');
+        }
+
+        function togglePlay() {
+            if (isPlaying) {
+                videoPlayer.pause();
+                isPlaying = false;
+                playOverlay.classList.add('show');
+            } else {
+                videoPlayer.play();
+                isPlaying = true;
+                playOverlay.classList.remove('show');
+            }
+        }
+
+        function toggleMute() {
+            if (videoPlayer.volume > 0) {
+                videoPlayer.volume = 0;
+                volumeSlider.value = 0;
+                volumePercentage.textContent = '0%';
+                volumeBtn.textContent = '🔇';
+            } else {
+                videoPlayer.volume = 1;
+                volumeSlider.value = 100;
+                volumePercentage.textContent = '100%';
+                volumeBtn.textContent = '🔊';
+            }
+        }
+
+        function nextVideo() {
+            if (shuffledVideos.length === 0) return;
+            currentIndex = (currentIndex + 1) % shuffledVideos.length;
+            playCurrentVideo();
+        }
+
+        function previousVideo() {
+            if (shuffledVideos.length === 0) return;
+            currentIndex = currentIndex === 0 ? shuffledVideos.length - 1 : currentIndex - 1;
+            playCurrentVideo();
+        }
+
+        function openModal() {
+            modal.classList.add('show');
+            updateVideoList();
+        }
+
+        function closeModal() {
+            modal.classList.remove('show');
+        }
+
+        function updateVideoList() {
+            const listTitle = document.getElementById('listTitle');
+            const videoList = document.getElementById('videoList');
+            
+            listTitle.textContent = `Danh sách video (${allVideos.length})`;
+            
+            videoList.innerHTML = allVideos.map(video => `
+                <div class="video-item">
+                    <div class="video-item-name">${video.name}</div>
+                    <button class="delete-btn" onclick="deleteVideo('${video.id}')">×</button>
+                </div>
+            `).join('');
+        }
+
+        async function deleteVideo(videoId) {
+            await deleteVideoFromDB(videoId);
+            
+            allVideos = allVideos.filter(v => v.id != videoId);
+            shuffledVideos = shuffledVideos.filter(v => v.id != videoId);
+            
+            if (currentIndex >= shuffledVideos.length && shuffledVideos.length > 0) {
+                currentIndex = shuffledVideos.length - 1;
+            }
+            
+            if (shuffledVideos.length === 0) {
+                videoContainer.classList.add('hidden');
+                uploadScreen.classList.remove('hidden');
+                closeModal();
+            } else {
+                playCurrentVideo();
+            }
+            
+            updateVideoList();
+        }
+
+        // Start app
+        init();
+    </script>
+</body>
+</html>
