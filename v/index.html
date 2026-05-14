@@ -66,9 +66,27 @@
             font-weight: 600;
             cursor: pointer;
             transition: transform 0.2s;
+            margin: 0 10px 10px;
         }
 
         .btn-upload:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-restore {
+            background: linear-gradient(135deg, #00b4d8, #0077b6);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin: 0 10px 10px;
+        }
+
+        .btn-restore:hover {
             transform: scale(1.05);
         }
 
@@ -132,8 +150,8 @@
         /* Video Count */
         .video-count {
             position: absolute;
-            bottom: 20px;
-            right: 20px;
+            bottom: 90px;
+            left: 20px;
             font-size: 14px;
             color: #fff;
             background: rgba(0, 0, 0, 0.5);
@@ -143,15 +161,24 @@
             pointer-events: none;
         }
 
-        /* Add Button - Top Right */
-        .add-button {
+        /* Controls */
+        .controls {
             position: absolute;
-            top: 20px;
             right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 10;
+        }
+
+        .control-btn {
             width: 56px;
             height: 56px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #ff006e, #8338ec);
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
             border: none;
             color: white;
             font-size: 24px;
@@ -160,17 +187,22 @@
             align-items: center;
             justify-content: center;
             transition: all 0.2s;
-            z-index: 10;
         }
 
-        .add-button:hover {
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
             transform: scale(1.1);
         }
 
-        /* Volume Control - Bottom Left */
+        .control-btn.add {
+            background: linear-gradient(135deg, #ff006e, #8338ec);
+        }
+
+        /* Volume Control */
         .volume-control {
             position: absolute;
-            left: 20px;
+            left: 50%;
+            transform: translateX(-50%);
             bottom: 20px;
             display: flex;
             align-items: center;
@@ -241,68 +273,6 @@
             font-size: 12px;
             font-weight: 600;
             min-width: 35px;
-        }
-
-        /* Auto-next Toggle - Top Left */
-        .settings-container {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            z-index: 10;
-        }
-
-        .setting-toggle {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 12px 20px;
-            border-radius: 50px;
-            backdrop-filter: blur(10px);
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .setting-toggle:hover {
-            background: rgba(0, 0, 0, 0.7);
-        }
-
-        .setting-label {
-            color: white;
-            font-size: 14px;
-            font-weight: 600;
-            user-select: none;
-        }
-
-        .toggle-switch {
-            position: relative;
-            width: 48px;
-            height: 26px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 13px;
-            transition: all 0.3s;
-        }
-
-        .toggle-switch.active {
-            background: linear-gradient(135deg, #ff006e, #8338ec);
-        }
-
-        .toggle-slider {
-            position: absolute;
-            top: 3px;
-            left: 3px;
-            width: 20px;
-            height: 20px;
-            background: white;
-            border-radius: 50%;
-            transition: all 0.3s;
-        }
-
-        .toggle-switch.active .toggle-slider {
-            transform: translateX(22px);
         }
 
         /* Swipe Indicator */
@@ -392,6 +362,32 @@
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
+            margin-bottom: 12px;
+        }
+
+        .btn-backup {
+            width: 100%;
+            background: linear-gradient(135deg, #00b4d8, #0077b6);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 12px;
+        }
+
+        .btn-restore-modal {
+            width: 100%;
+            background: linear-gradient(135deg, #06d6a0, #118ab2);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
             margin-bottom: 24px;
         }
 
@@ -464,47 +460,33 @@
             color: white;
             font-size: 16px;
             z-index: 5;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px 40px;
+            border-radius: 10px;
+        }
+
+        .backup-info {
+            background: #2a2a2a;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 24px;
+            color: #ccc;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .backup-info strong {
+            color: #00b4d8;
+            display: block;
+            margin-bottom: 8px;
         }
 
         @media (max-width: 768px) {
-            .add-button {
-                top: 15px;
-                right: 15px;
-                width: 48px;
-                height: 48px;
-            }
-            
-            .settings-container {
-                top: 15px;
-                left: 15px;
-                gap: 10px;
-            }
-
-            .setting-toggle {
-                padding: 10px 15px;
-                gap: 10px;
-            }
-
-            .setting-label {
-                font-size: 13px;
-            }
-
-            .toggle-switch {
-                width: 42px;
-                height: 24px;
-            }
-
-            .toggle-slider {
-                width: 18px;
-                height: 18px;
-            }
-
-            .toggle-switch.active .toggle-slider {
-                transform: translateX(18px);
+            .controls {
+                right: 10px;
             }
             
             .volume-control {
-                left: 15px;
                 bottom: 15px;
                 padding: 10px 15px;
             }
@@ -514,8 +496,7 @@
             }
 
             .video-count {
-                bottom: 15px;
-                right: 15px;
+                bottom: 75px;
             }
         }
     </style>
@@ -527,15 +508,21 @@
             <div class="upload-icon">📱</div>
             <div class="upload-title">Video Reels</div>
             <div class="upload-subtitle">Tải video lên để bắt đầu lướt</div>
-            <input type="file" id="fileInput" accept="video/*" multiple>
-            <button class="btn-upload" onclick="document.getElementById('fileInput').click()">
-                📁 Chọn Video
-            </button>
+            <div>
+                <input type="file" id="fileInput" accept="video/*" multiple>
+                <button class="btn-upload" onclick="document.getElementById('fileInput').click()">
+                    📁 Chọn Video
+                </button>
+                <input type="file" id="restoreInput" accept=".zip">
+                <button class="btn-restore" onclick="document.getElementById('restoreInput').click()">
+                    📥 Khôi phục Backup
+                </button>
+            </div>
         </div>
 
         <!-- Video Player -->
         <div class="video-container hidden" id="videoContainer">
-            <div class="loading-text" id="loadingText" style="display: none;">Đang tải video...</div>
+            <div class="loading-text" id="loadingText" style="display: none;">Đang xử lý...</div>
             
             <video id="videoPlayer"></video>
             
@@ -547,24 +534,7 @@
                 </div>
             </div>
 
-            <!-- Settings Container -->
-            <div class="settings-container">
-                <!-- Auto-next Toggle -->
-                <div class="setting-toggle" onclick="toggleAutoNext()">
-                    <span class="setting-label">Tự động chuyển</span>
-                    <div class="toggle-switch active" id="toggleAutoNext">
-                        <div class="toggle-slider"></div>
-                    </div>
-                </div>
-
-                <!-- Loop Toggle -->
-                <div class="setting-toggle" onclick="toggleLoop()">
-                    <span class="setting-label">Phát lặp lại</span>
-                    <div class="toggle-switch active" id="toggleLoop">
-                        <div class="toggle-slider"></div>
-                    </div>
-                </div>
-            </div>
+            <div class="video-count" id="videoCount">1 / 10</div>
 
             <!-- Volume Control -->
             <div class="volume-control">
@@ -575,10 +545,12 @@
                 </div>
             </div>
 
-            <!-- Add Button -->
-            <button class="add-button" onclick="openModal()">+</button>
-
-            <div class="video-count" id="videoCount">1 / 10</div>
+            <div class="controls">
+                <button class="control-btn" onclick="previousVideo()">▲</button>
+                <button class="control-btn" onclick="togglePlay()" id="playBtn">⏸</button>
+                <button class="control-btn" onclick="nextVideo()">▼</button>
+                <button class="control-btn add" onclick="openModal()">+</button>
+            </div>
         </div>
 
         <!-- Modal -->
@@ -594,6 +566,22 @@
                     ➕ Thêm video mới
                 </button>
 
+                <button class="btn-backup" onclick="backupVideos()">
+                    💾 Backup tất cả video
+                </button>
+
+                <input type="file" id="restoreInputModal" accept=".zip">
+                <button class="btn-restore-modal" onclick="document.getElementById('restoreInputModal').click()">
+                    📥 Khôi phục từ backup
+                </button>
+
+                <div class="backup-info">
+                    <strong>💡 Backup & Restore:</strong>
+                    • <b>Backup</b>: Tải tất cả video về file .zip<br>
+                    • <b>Restore</b>: Khôi phục video từ file backup<br>
+                    • An toàn khi xóa dữ liệu trình duyệt!
+                </div>
+
                 <div class="video-list-title" id="listTitle">Danh sách video (0)</div>
                 <div id="videoList"></div>
 
@@ -602,6 +590,7 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script>
         const DB_NAME = 'VideoReelsDB';
         const DB_VERSION = 1;
@@ -615,8 +604,6 @@
         let touchStartY = 0;
         let touchEndY = 0;
         let wheelTimeout = null;
-        let autoNextEnabled = true; // Mặc định bật tự động chuyển
-        let loopEnabled = true; // Mặc định bật phát lặp lại
 
         const videoPlayer = document.getElementById('videoPlayer');
         const uploadScreen = document.getElementById('uploadScreen');
@@ -624,13 +611,12 @@
         const playOverlay = document.getElementById('playOverlay');
         const modal = document.getElementById('modal');
         const videoCount = document.getElementById('videoCount');
+        const playBtn = document.getElementById('playBtn');
         const volumeSlider = document.getElementById('volumeSlider');
         const volumeBtn = document.getElementById('volumeBtn');
         const volumePercentage = document.getElementById('volumePercentage');
         const swipeIndicator = document.getElementById('swipeIndicator');
         const loadingText = document.getElementById('loadingText');
-        const toggleAutoNextBtn = document.getElementById('toggleAutoNext');
-        const toggleLoopBtn = document.getElementById('toggleLoop');
 
         // Initialize IndexedDB
         function initDB() {
@@ -694,17 +680,101 @@
             });
         }
 
-        // Toggle Auto-next
-        function toggleAutoNext() {
-            autoNextEnabled = !autoNextEnabled;
-            toggleAutoNextBtn.classList.toggle('active', autoNextEnabled);
+        // Backup videos
+        async function backupVideos() {
+            if (allVideos.length === 0) {
+                alert('Không có video nào để backup!');
+                return;
+            }
+
+            loadingText.textContent = 'Đang tạo backup...';
+            loadingText.style.display = 'block';
+
+            try {
+                const zip = new JSZip();
+                const folder = zip.folder('videos');
+
+                // Add all videos to zip
+                for (let i = 0; i < allVideos.length; i++) {
+                    const video = allVideos[i];
+                    folder.file(video.name, video.blob);
+                }
+
+                // Generate zip file
+                const content = await zip.generateAsync({ type: 'blob' });
+                
+                // Download zip file
+                const url = URL.createObjectURL(content);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `video-reels-backup-${Date.now()}.zip`;
+                a.click();
+                URL.revokeObjectURL(url);
+
+                loadingText.style.display = 'none';
+                alert(`✅ Đã backup ${allVideos.length} video thành công!`);
+            } catch (error) {
+                console.error('Backup error:', error);
+                loadingText.style.display = 'none';
+                alert('❌ Lỗi khi tạo backup: ' + error.message);
+            }
         }
 
-        // Toggle Loop
-        function toggleLoop() {
-            loopEnabled = !loopEnabled;
-            toggleLoopBtn.classList.toggle('active', loopEnabled);
-            videoPlayer.loop = loopEnabled;
+        // Restore videos from backup
+        async function restoreVideos(file) {
+            if (!file) return;
+
+            loadingText.textContent = 'Đang khôi phục backup...';
+            loadingText.style.display = 'block';
+
+            try {
+                const zip = new JSZip();
+                const contents = await zip.loadAsync(file);
+                const videoFiles = [];
+
+                // Extract all video files
+                for (const [filename, fileData] of Object.entries(contents.files)) {
+                    if (!fileData.dir && filename.includes('videos/')) {
+                        const blob = await fileData.async('blob');
+                        const name = filename.replace('videos/', '');
+                        videoFiles.push({ name, blob });
+                    }
+                }
+
+                if (videoFiles.length === 0) {
+                    throw new Error('Không tìm thấy video trong file backup!');
+                }
+
+                // Save to database
+                for (const file of videoFiles) {
+                    const video = {
+                        id: Date.now() + Math.random(),
+                        name: file.name,
+                        blob: file.blob,
+                        url: URL.createObjectURL(file.blob)
+                    };
+                    
+                    allVideos.push(video);
+                    await saveVideoToDB(video);
+                }
+
+                loadingText.style.display = 'none';
+                
+                if (shuffledVideos.length === 0) {
+                    shuffleVideos();
+                    uploadScreen.classList.add('hidden');
+                    videoContainer.classList.remove('hidden');
+                    playCurrentVideo();
+                }
+
+                updateVideoList();
+                closeModal();
+                alert(`✅ Đã khôi phục ${videoFiles.length} video thành công!`);
+            } catch (error) {
+                console.error('Restore error:', error);
+                loadingText.style.display = 'none';
+                alert('❌ Lỗi khi khôi phục: ' + error.message);
+            }
         }
 
         // Initialize app
@@ -724,17 +794,21 @@
         // File input handlers
         document.getElementById('fileInput').addEventListener('change', handleFileUpload);
         document.getElementById('fileInputModal').addEventListener('change', handleFileUpload);
+        document.getElementById('restoreInput').addEventListener('change', (e) => {
+            if (e.target.files[0]) {
+                restoreVideos(e.target.files[0]);
+                e.target.value = '';
+            }
+        });
+        document.getElementById('restoreInputModal').addEventListener('change', (e) => {
+            if (e.target.files[0]) {
+                restoreVideos(e.target.files[0]);
+                e.target.value = '';
+            }
+        });
 
         // Video events
-        videoPlayer.addEventListener('ended', () => {
-            if (autoNextEnabled && !loopEnabled) {
-                nextVideo();
-            } else if (!loopEnabled) {
-                isPlaying = false;
-                playOverlay.classList.add('show');
-            }
-            // Nếu loopEnabled = true, video sẽ tự động loop do thuộc tính loop
-        });
+        videoPlayer.addEventListener('ended', nextVideo);
         videoPlayer.addEventListener('click', togglePlay);
 
         // Volume control
@@ -811,6 +885,7 @@
                 return;
             }
 
+            loadingText.textContent = 'Đang tải video...';
             loadingText.style.display = 'block';
 
             for (const file of videoFiles) {
@@ -862,11 +937,11 @@
 
             const video = shuffledVideos[currentIndex];
             videoPlayer.src = video.url;
-            videoPlayer.loop = loopEnabled; // Set loop theo setting hiện tại
             videoCount.textContent = `${currentIndex + 1} / ${shuffledVideos.length}`;
             
             videoPlayer.play();
             isPlaying = true;
+            playBtn.textContent = '⏸';
             playOverlay.classList.remove('show');
         }
 
@@ -874,10 +949,12 @@
             if (isPlaying) {
                 videoPlayer.pause();
                 isPlaying = false;
+                playBtn.textContent = '▶';
                 playOverlay.classList.add('show');
             } else {
                 videoPlayer.play();
                 isPlaying = true;
+                playBtn.textContent = '⏸';
                 playOverlay.classList.remove('show');
             }
         }
