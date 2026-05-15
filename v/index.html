@@ -5,19 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Reels</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: #000;
             overflow: hidden;
             height: 100vh;
             width: 100vw;
-            touch-action: pan-y;
         }
 
         .container {
@@ -29,1008 +24,667 @@
             justify-content: center;
         }
 
-        /* Upload Screen */
-        .upload-screen {
-            text-align: center;
-            color: white;
-        }
+        /* ── Upload Screen ── */
+        .upload-screen { text-align: center; color: white; padding: 20px; }
+        .upload-screen.hidden { display: none; }
+        .upload-icon { font-size: 80px; margin-bottom: 16px; }
+        .upload-title { font-size: 28px; font-weight: bold; margin-bottom: 8px; }
+        .upload-subtitle { font-size: 16px; color: #aaa; margin-bottom: 28px; }
 
-        .upload-screen.hidden {
-            display: none;
-        }
-
-        .upload-icon {
-            font-size: 96px;
-            margin-bottom: 20px;
-        }
-
-        .upload-title {
-            font-size: 32px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .upload-subtitle {
-            font-size: 18px;
-            color: #aaa;
-            margin-bottom: 30px;
-        }
-
-        .btn-upload {
-            background: linear-gradient(135deg, #ff006e, #8338ec);
+        .btn-upload, .btn-restore {
             color: white;
             border: none;
-            padding: 16px 40px;
+            padding: 14px 36px;
             border-radius: 50px;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: transform 0.2s;
-            margin: 0 10px 10px;
+            margin: 6px;
+            display: inline-block;
         }
+        .btn-upload { background: linear-gradient(135deg, #ff006e, #8338ec); }
+        .btn-restore { background: linear-gradient(135deg, #00b4d8, #0077b6); }
+        .btn-upload:hover, .btn-restore:hover { transform: scale(1.05); }
 
-        .btn-upload:hover {
-            transform: scale(1.05);
-        }
-
-        .btn-restore {
-            background: linear-gradient(135deg, #00b4d8, #0077b6);
-            color: white;
-            border: none;
-            padding: 16px 40px;
-            border-radius: 50px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s;
-            margin: 0 10px 10px;
-        }
-
-        .btn-restore:hover {
-            transform: scale(1.05);
-        }
-
-        /* Video Player */
-        .video-container {
-            position: relative;
-            height: 100%;
-            width: 100%;
-        }
-
-        .video-container.hidden {
-            display: none;
-        }
+        /* ── Video Container ── */
+        .video-container { position: relative; height: 100%; width: 100%; }
+        .video-container.hidden { display: none; }
 
         video {
             height: 100%;
             width: 100%;
             object-fit: contain;
             background: #000;
+            cursor: pointer;
         }
 
-        /* Play Overlay */
+        /* ── Play Overlay ── */
         .play-overlay {
             position: absolute;
             inset: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(0, 0, 0, 0.3);
-            cursor: pointer;
+            background: rgba(0,0,0,0.3);
             opacity: 0;
             transition: opacity 0.3s;
             pointer-events: none;
         }
-
-        .play-overlay.show {
-            opacity: 1;
-            pointer-events: all;
-        }
-
+        .play-overlay.show { opacity: 1; pointer-events: all; cursor: pointer; }
         .play-button {
-            width: 80px;
-            height: 80px;
+            width: 80px; height: 80px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255,255,255,0.2);
             backdrop-filter: blur(10px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
         }
-
         .play-icon {
-            width: 0;
-            height: 0;
+            width: 0; height: 0;
             border-left: 25px solid white;
             border-top: 15px solid transparent;
             border-bottom: 15px solid transparent;
             margin-left: 5px;
         }
 
-        /* Video Count */
+        /* ── Swipe Indicator ── */
+        .swipe-indicator {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            color: white; font-size: 48px;
+            opacity: 0; transition: opacity 0.3s;
+            pointer-events: none; z-index: 20;
+        }
+        .swipe-indicator.show { opacity: 0.8; }
+
+        /* ── Video Count ── */
         .video-count {
             position: absolute;
-            bottom: 90px;
-            left: 20px;
-            font-size: 14px;
-            color: #fff;
-            background: rgba(0, 0, 0, 0.5);
+            bottom: 90px; left: 20px;
+            font-size: 14px; color: #fff;
+            background: rgba(0,0,0,0.5);
             padding: 8px 16px;
             border-radius: 20px;
             backdrop-filter: blur(10px);
             pointer-events: none;
         }
 
-        /* Controls */
-        .controls {
+        /* ── Add Button (top right) ── */
+        .btn-add {
             position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            z-index: 10;
-        }
-
-        .control-btn {
-            width: 56px;
-            height: 56px;
+            top: 20px; right: 20px;
+            width: 52px; height: 52px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-
-        .control-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(1.1);
-        }
-
-        .control-btn.add {
             background: linear-gradient(135deg, #ff006e, #8338ec);
+            border: none; color: white;
+            font-size: 28px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 10;
+            box-shadow: 0 4px 15px rgba(255,0,110,0.4);
+            transition: transform 0.2s;
         }
+        .btn-add:hover { transform: scale(1.1); }
 
-        /* Volume Control */
+        /* ── Backup Progress (top left) ── */
+        .backup-progress {
+            position: absolute;
+            top: 20px; left: 20px;
+            z-index: 10;
+            background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 10px 16px;
+            color: white;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            min-width: 190px;
+        }
+        .backup-progress.show { display: flex; }
+        .bp-bar-wrap {
+            flex: 1; height: 6px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px; overflow: hidden;
+        }
+        .bp-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00b4d8, #06d6a0);
+            border-radius: 3px;
+            transition: width 0.3s;
+            width: 0%;
+        }
+        .bp-text { font-size: 13px; white-space: nowrap; font-weight: 600; }
+
+        /* ── Volume Control ── */
         .volume-control {
             position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
+            left: 50%; transform: translateX(-50%);
             bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
+            display: flex; align-items: center; gap: 12px;
             z-index: 10;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 12px 20px;
+            background: rgba(0,0,0,0.5);
+            padding: 10px 18px;
             border-radius: 50px;
             backdrop-filter: blur(10px);
         }
-
         .volume-btn {
-            width: 40px;
-            height: 40px;
+            width: 38px; height: 38px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            font-size: 20px;
+            background: rgba(255,255,255,0.2);
+            border: none; color: white; font-size: 18px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s;
         }
-
-        .volume-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .volume-slider-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
+        .volume-btn:hover { background: rgba(255,255,255,0.3); }
         .volume-slider {
             -webkit-appearance: none;
-            width: 120px;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 3px;
-            outline: none;
-            cursor: pointer;
+            width: 120px; height: 6px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 3px; outline: none; cursor: pointer;
         }
-
         .volume-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            background: white;
-            border-radius: 50%;
-            cursor: pointer;
+            width: 16px; height: 16px;
+            background: white; border-radius: 50%; cursor: pointer;
         }
-
         .volume-slider::-moz-range-thumb {
-            width: 16px;
-            height: 16px;
-            background: white;
-            border-radius: 50%;
-            cursor: pointer;
-            border: none;
+            width: 16px; height: 16px;
+            background: white; border-radius: 50%; cursor: pointer; border: none;
         }
+        .vol-pct { color: white; font-size: 12px; font-weight: 600; min-width: 35px; }
 
-        .volume-percentage {
-            color: white;
-            font-size: 12px;
-            font-weight: 600;
-            min-width: 35px;
-        }
-
-        /* Swipe Indicator */
-        .swipe-indicator {
-            position: absolute;
-            top: 50%;
-            left: 50%;
+        /* ── Loading Overlay ── */
+        .loading-text {
+            position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            color: white;
-            font-size: 48px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
-            z-index: 20;
-        }
-
-        .swipe-indicator.show {
-            opacity: 0.8;
-        }
-
-        /* Modal */
-        .modal {
-            position: absolute;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.85);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
-        }
-
-        .modal.show {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        .modal-content {
-            background: #1a1a1a;
-            border-radius: 20px;
-            padding: 30px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-title {
-            color: white;
-            font-size: 24px;
-            font-weight: bold;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            color: #999;
-            font-size: 28px;
-            cursor: pointer;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .close-btn:hover {
-            color: white;
-        }
-
-        .btn-add-video {
-            width: 100%;
-            background: linear-gradient(135deg, #ff006e, #8338ec);
-            color: white;
-            border: none;
-            padding: 16px;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-bottom: 12px;
-        }
-
-        .btn-backup {
-            width: 100%;
-            background: linear-gradient(135deg, #00b4d8, #0077b6);
-            color: white;
-            border: none;
-            padding: 16px;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-bottom: 12px;
-        }
-
-        .btn-restore-modal {
-            width: 100%;
-            background: linear-gradient(135deg, #06d6a0, #118ab2);
-            color: white;
-            border: none;
-            padding: 16px;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-bottom: 24px;
-        }
-
-        .video-list-title {
-            color: white;
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 12px;
-        }
-
-        .video-item {
-            background: #2a2a2a;
-            border-radius: 10px;
-            padding: 12px;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .video-item-name {
-            color: white;
-            font-size: 14px;
-            flex: 1;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            margin-right: 10px;
-        }
-
-        .delete-btn {
-            background: none;
-            border: none;
-            color: #ff006e;
-            font-size: 20px;
-            cursor: pointer;
-            padding: 4px 8px;
-        }
-
-        .delete-btn:hover {
-            color: #ff4d94;
-        }
-
-        .btn-shuffle {
-            width: 100%;
-            background: #3b82f6;
-            color: white;
-            border: none;
-            padding: 14px;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 16px;
-        }
-
-        .btn-shuffle:hover {
-            background: #2563eb;
-        }
-
-        input[type="file"] {
+            color: white; font-size: 16px; z-index: 50;
+            background: rgba(0,0,0,0.8);
+            padding: 20px 40px; border-radius: 10px;
             display: none;
         }
 
-        .loading-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 16px;
-            z-index: 5;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 20px 40px;
-            border-radius: 10px;
+        /* ── Modal ── */
+        .modal {
+            position: absolute; inset: 0;
+            background: rgba(0,0,0,0.85);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 100;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.3s;
         }
+        .modal.show { opacity: 1; pointer-events: all; }
+        .modal-content {
+            background: #1a1a1a;
+            border-radius: 20px; padding: 28px;
+            max-width: 500px; width: 90%;
+            max-height: 80vh; overflow-y: auto;
+        }
+        .modal-header {
+            display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 20px;
+        }
+        .modal-title { color: white; font-size: 22px; font-weight: bold; }
+        .close-btn {
+            background: none; border: none; color: #999;
+            font-size: 28px; cursor: pointer;
+            width: 36px; height: 36px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .close-btn:hover { color: white; }
+
+        .modal-btn {
+            width: 100%; color: white; border: none;
+            padding: 14px; border-radius: 12px;
+            font-size: 15px; font-weight: 600;
+            cursor: pointer; margin-bottom: 10px;
+        }
+        .mb-add    { background: linear-gradient(135deg, #ff006e, #8338ec); }
+        .mb-backup { background: linear-gradient(135deg, #00b4d8, #0077b6); }
+        .mb-restore{ background: linear-gradient(135deg, #06d6a0, #118ab2); }
+        .mb-shuffle{ background: #3b82f6; margin-top: 8px; }
 
         .backup-info {
-            background: #2a2a2a;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 24px;
-            color: #ccc;
-            font-size: 13px;
-            line-height: 1.6;
+            background: #2a2a2a; border-radius: 10px;
+            padding: 12px 14px; margin-bottom: 16px;
+            color: #bbb; font-size: 13px; line-height: 1.7;
         }
+        .backup-info strong { color: #00b4d8; display: block; margin-bottom: 4px; }
 
-        .backup-info strong {
-            color: #00b4d8;
-            display: block;
-            margin-bottom: 8px;
+        .list-title { color: white; font-size: 15px; font-weight: 600; margin-bottom: 10px; }
+        .video-item {
+            background: #2a2a2a; border-radius: 10px;
+            padding: 11px 14px; margin-bottom: 8px;
+            display: flex; align-items: center;
         }
+        .video-item-name {
+            color: white; font-size: 13px;
+            flex: 1; overflow: hidden;
+            text-overflow: ellipsis; white-space: nowrap;
+            margin-right: 8px;
+        }
+        .delete-btn {
+            background: none; border: none;
+            color: #ff006e; font-size: 20px; cursor: pointer; padding: 2px 6px;
+        }
+        .delete-btn:hover { color: #ff4d94; }
+
+        input[type="file"] { display: none; }
 
         @media (max-width: 768px) {
-            .controls {
-                right: 10px;
-            }
-            
-            .volume-control {
-                bottom: 15px;
-                padding: 10px 15px;
-            }
-            
-            .volume-slider {
-                width: 80px;
-            }
-
-            .video-count {
-                bottom: 75px;
-            }
+            .volume-slider { width: 80px; }
+            .video-count { bottom: 75px; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Upload Screen -->
-        <div class="upload-screen" id="uploadScreen">
-            <div class="upload-icon">📱</div>
-            <div class="upload-title">Video Reels</div>
-            <div class="upload-subtitle">Tải video lên để bắt đầu lướt</div>
-            <div>
-                <input type="file" id="fileInput" accept="video/*" multiple>
-                <button class="btn-upload" onclick="document.getElementById('fileInput').click()">
-                    📁 Chọn Video
-                </button>
-                <input type="file" id="restoreInput" accept=".zip">
-                <button class="btn-restore" onclick="document.getElementById('restoreInput').click()">
-                    📥 Khôi phục Backup
-                </button>
-            </div>
+<div class="container">
+
+    <!-- Upload Screen -->
+    <div class="upload-screen" id="uploadScreen">
+        <div class="upload-icon">📱</div>
+        <div class="upload-title">Video Reels</div>
+        <div class="upload-subtitle">Tải video lên để bắt đầu lướt</div>
+        <input type="file" id="fileInput" accept="video/*" multiple>
+        <button class="btn-upload" onclick="document.getElementById('fileInput').click()">📁 Chọn Video</button>
+        <input type="file" id="restoreInput" accept=".zip">
+        <button class="btn-restore" onclick="document.getElementById('restoreInput').click()">📥 Khôi phục Backup</button>
+    </div>
+
+    <!-- Video Player -->
+    <div class="video-container hidden" id="videoContainer">
+
+        <div class="loading-text" id="loadingText">Đang xử lý...</div>
+
+        <video id="videoPlayer"></video>
+
+        <div class="swipe-indicator" id="swipeIndicator"></div>
+
+        <div class="play-overlay" id="playOverlay" onclick="togglePlay()">
+            <div class="play-button"><div class="play-icon"></div></div>
         </div>
 
-        <!-- Video Player -->
-        <div class="video-container hidden" id="videoContainer">
-            <div class="loading-text" id="loadingText" style="display: none;">Đang xử lý...</div>
-            
-            <video id="videoPlayer"></video>
-            
-            <div class="swipe-indicator" id="swipeIndicator"></div>
-            
-            <div class="play-overlay" id="playOverlay" onclick="togglePlay()">
-                <div class="play-button">
-                    <div class="play-icon"></div>
-                </div>
-            </div>
-
-            <div class="video-count" id="videoCount">1 / 10</div>
-
-            <!-- Volume Control -->
-            <div class="volume-control">
-                <button class="volume-btn" onclick="toggleMute()" id="volumeBtn">🔊</button>
-                <div class="volume-slider-container">
-                    <input type="range" min="0" max="100" value="100" class="volume-slider" id="volumeSlider">
-                    <div class="volume-percentage" id="volumePercentage">100%</div>
-                </div>
-            </div>
-
-            <div class="controls">
-                <button class="control-btn" onclick="previousVideo()">▲</button>
-                <button class="control-btn" onclick="togglePlay()" id="playBtn">⏸</button>
-                <button class="control-btn" onclick="nextVideo()">▼</button>
-                <button class="control-btn add" onclick="openModal()">+</button>
-            </div>
+        <!-- Top left: backup progress -->
+        <div class="backup-progress" id="backupProgress">
+            <div class="bp-bar-wrap"><div class="bp-bar" id="bpBar"></div></div>
+            <div class="bp-text" id="bpText">0%</div>
         </div>
 
-        <!-- Modal -->
-        <div class="modal" id="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <div class="modal-title">Quản lý Video</div>
-                    <button class="close-btn" onclick="closeModal()">×</button>
-                </div>
+        <!-- Top right: add button -->
+        <button class="btn-add" onclick="openModal()">+</button>
 
-                <input type="file" id="fileInputModal" accept="video/*" multiple>
-                <button class="btn-add-video" onclick="document.getElementById('fileInputModal').click()">
-                    ➕ Thêm video mới
-                </button>
+        <!-- Bottom center: video count -->
+        <div class="video-count" id="videoCount">1 / 1</div>
 
-                <button class="btn-backup" onclick="backupVideos()">
-                    💾 Backup tất cả video
-                </button>
+        <!-- Bottom center: volume -->
+        <div class="volume-control">
+            <button class="volume-btn" id="volumeBtn" onclick="toggleMute()">🔊</button>
+            <input type="range" min="0" max="100" value="100" class="volume-slider" id="volumeSlider">
+            <div class="vol-pct" id="volPct">100%</div>
+        </div>
 
-                <input type="file" id="restoreInputModal" accept=".zip">
-                <button class="btn-restore-modal" onclick="document.getElementById('restoreInputModal').click()">
-                    📥 Khôi phục từ backup
-                </button>
+    </div>
 
-                <div class="backup-info">
-                    <strong>💡 Backup & Restore:</strong>
-                    • <b>Backup</b>: Tải tất cả video về file .zip<br>
-                    • <b>Restore</b>: Khôi phục video từ file backup<br>
-                    • An toàn khi xóa dữ liệu trình duyệt!
-                </div>
-
-                <div class="video-list-title" id="listTitle">Danh sách video (0)</div>
-                <div id="videoList"></div>
-
-                <button class="btn-shuffle" onclick="shuffleVideos()">🔀 Xáo trộn lại thứ tự</button>
+    <!-- Modal -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Quản lý Video</div>
+                <button class="close-btn" onclick="closeModal()">×</button>
             </div>
+
+            <input type="file" id="fileInputModal" accept="video/*" multiple>
+            <button class="modal-btn mb-add" onclick="document.getElementById('fileInputModal').click()">➕ Thêm video mới</button>
+
+            <button class="modal-btn mb-backup" onclick="backupVideos()">💾 Backup tất cả video</button>
+
+            <input type="file" id="restoreInputModal" accept=".zip">
+            <button class="modal-btn mb-restore" onclick="document.getElementById('restoreInputModal').click()">📥 Khôi phục từ backup</button>
+
+            <div class="backup-info">
+                <strong>💡 Backup & Restore</strong>
+                • <b>Backup</b>: Tải video về máy dưới dạng .zip<br>
+                • <b>Restore</b>: Khôi phục video từ file backup<br>
+                • An toàn khi xóa dữ liệu trình duyệt!
+            </div>
+
+            <div class="list-title" id="listTitle">Danh sách video (0)</div>
+            <div id="videoList"></div>
+
+            <button class="modal-btn mb-shuffle" onclick="shuffleVideos()">🔀 Xáo trộn lại thứ tự</button>
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script>
-        const DB_NAME = 'VideoReelsDB';
-        const DB_VERSION = 1;
-        const STORE_NAME = 'videos';
-        let db = null;
+</div>
 
-        let allVideos = [];
-        let shuffledVideos = [];
-        let currentIndex = 0;
-        let isPlaying = false;
-        let touchStartY = 0;
-        let touchEndY = 0;
-        let wheelTimeout = null;
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+    // ── DB ──
+    const DB_NAME = 'VideoReelsDB', DB_VER = 1, STORE = 'videos';
+    let db = null;
 
-        const videoPlayer = document.getElementById('videoPlayer');
-        const uploadScreen = document.getElementById('uploadScreen');
-        const videoContainer = document.getElementById('videoContainer');
-        const playOverlay = document.getElementById('playOverlay');
-        const modal = document.getElementById('modal');
-        const videoCount = document.getElementById('videoCount');
-        const playBtn = document.getElementById('playBtn');
-        const volumeSlider = document.getElementById('volumeSlider');
-        const volumeBtn = document.getElementById('volumeBtn');
-        const volumePercentage = document.getElementById('volumePercentage');
-        const swipeIndicator = document.getElementById('swipeIndicator');
-        const loadingText = document.getElementById('loadingText');
+    function initDB() {
+        return new Promise((res, rej) => {
+            const r = indexedDB.open(DB_NAME, DB_VER);
+            r.onerror = () => rej(r.error);
+            r.onsuccess = () => { db = r.result; res(db); };
+            r.onupgradeneeded = e => {
+                const d = e.target.result;
+                if (!d.objectStoreNames.contains(STORE))
+                    d.createObjectStore(STORE, { keyPath: 'id' });
+            };
+        });
+    }
 
-        // Initialize IndexedDB
-        function initDB() {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open(DB_NAME, DB_VERSION);
-                
-                request.onerror = () => reject(request.error);
-                request.onsuccess = () => {
-                    db = request.result;
-                    resolve(db);
-                };
-                
-                request.onupgradeneeded = (event) => {
-                    const db = event.target.result;
-                    if (!db.objectStoreNames.contains(STORE_NAME)) {
-                        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-                    }
-                };
-            });
+    function saveToDB(video) {
+        return new Promise((res, rej) => {
+            const tx = db.transaction([STORE], 'readwrite');
+            const req = tx.objectStore(STORE).put(video);
+            req.onsuccess = () => res();
+            req.onerror = () => rej(req.error);
+        });
+    }
+
+    function loadFromDB() {
+        return new Promise((res, rej) => {
+            const tx = db.transaction([STORE], 'readonly');
+            const req = tx.objectStore(STORE).getAll();
+            req.onsuccess = () => res(req.result.map(v => ({ ...v, url: URL.createObjectURL(v.blob) })));
+            req.onerror = () => rej(req.error);
+        });
+    }
+
+    function deleteFromDB(id) {
+        return new Promise((res, rej) => {
+            const tx = db.transaction([STORE], 'readwrite');
+            const req = tx.objectStore(STORE).delete(id);
+            req.onsuccess = () => res();
+            req.onerror = () => rej(req.error);
+        });
+    }
+
+    // ── State ──
+    let allVideos = [], shuffled = [], curIdx = 0, playing = false;
+    let touchStartY = 0, touchEndY = 0, wheelLock = false;
+
+    // ── DOM ──
+    const videoPlayer   = document.getElementById('videoPlayer');
+    const uploadScreen  = document.getElementById('uploadScreen');
+    const videoContainer= document.getElementById('videoContainer');
+    const playOverlay   = document.getElementById('playOverlay');
+    const modal         = document.getElementById('modal');
+    const videoCount    = document.getElementById('videoCount');
+    const volumeSlider  = document.getElementById('volumeSlider');
+    const volumeBtn     = document.getElementById('volumeBtn');
+    const volPct        = document.getElementById('volPct');
+    const swipeInd      = document.getElementById('swipeIndicator');
+    const loadingText   = document.getElementById('loadingText');
+    const bpWrap        = document.getElementById('backupProgress');
+    const bpBar         = document.getElementById('bpBar');
+    const bpText        = document.getElementById('bpText');
+
+    // ── Init ──
+    async function init() {
+        await initDB();
+        const saved = await loadFromDB();
+        if (saved.length > 0) {
+            allVideos = saved;
+            doShuffle();
+            showPlayer();
+            playAt(0);
+        }
+    }
+
+    function showPlayer() {
+        uploadScreen.classList.add('hidden');
+        videoContainer.classList.remove('hidden');
+    }
+
+    function hidePlayer() {
+        videoContainer.classList.add('hidden');
+        uploadScreen.classList.remove('hidden');
+    }
+
+    // ── File Inputs ──
+    document.getElementById('fileInput').addEventListener('change', handleUpload);
+    document.getElementById('fileInputModal').addEventListener('change', handleUpload);
+    document.getElementById('restoreInput').addEventListener('change', e => { handleRestore(e.target.files[0]); e.target.value = ''; });
+    document.getElementById('restoreInputModal').addEventListener('change', e => { handleRestore(e.target.files[0]); e.target.value = ''; });
+
+    async function handleUpload(e) {
+        const files = Array.from(e.target.files).filter(f => f.type.startsWith('video/'));
+        if (!files.length) { alert('Vui lòng chọn ít nhất một file video!'); return; }
+
+        loadingText.style.display = 'block';
+        for (const f of files) {
+            const v = { id: Date.now() + Math.random(), name: f.name, blob: f, url: URL.createObjectURL(f) };
+            allVideos.push(v);
+            await saveToDB(v);
+        }
+        loadingText.style.display = 'none';
+
+        if (shuffled.length === 0) {
+            doShuffle();
+            showPlayer();
+            playAt(0);
+        }
+        updateList();
+        closeModal();
+        e.target.value = '';
+    }
+
+    // ── Shuffle ──
+    function shuffle(arr) {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
+
+    function doShuffle() {
+        shuffled = shuffle(allVideos);
+        curIdx = 0;
+    }
+
+    function shuffleVideos() {
+        doShuffle();
+        playAt(0);
+        closeModal();
+    }
+
+    // ── Playback ──
+    function playAt(idx) {
+        if (!shuffled.length) return;
+        curIdx = idx;
+        const v = shuffled[curIdx];
+        videoPlayer.src = v.url;
+        videoCount.textContent = `${curIdx + 1} / ${shuffled.length}`;
+        videoPlayer.play().catch(() => {});
+        playing = true;
+        playOverlay.classList.remove('show');
+    }
+
+    function togglePlay() {
+        if (playing) {
+            videoPlayer.pause();
+            playing = false;
+            playOverlay.classList.add('show');
+        } else {
+            videoPlayer.play().catch(() => {});
+            playing = true;
+            playOverlay.classList.remove('show');
+        }
+    }
+
+    function nextVideo() {
+        if (!shuffled.length) return;
+        playAt((curIdx + 1) % shuffled.length);
+    }
+
+    function prevVideo() {
+        if (!shuffled.length) return;
+        playAt(curIdx === 0 ? shuffled.length - 1 : curIdx - 1);
+    }
+
+    // ── Video events ──
+    videoPlayer.addEventListener('ended', nextVideo);
+    videoPlayer.addEventListener('click', togglePlay);
+
+    // ── Volume ──
+    volumeSlider.addEventListener('input', e => {
+        const v = e.target.value / 100;
+        videoPlayer.volume = v;
+        volPct.textContent = e.target.value + '%';
+        volumeBtn.textContent = v === 0 ? '🔇' : v < 0.5 ? '🔉' : '🔊';
+    });
+
+    function toggleMute() {
+        if (videoPlayer.volume > 0) {
+            videoPlayer.volume = 0; volumeSlider.value = 0;
+            volPct.textContent = '0%'; volumeBtn.textContent = '🔇';
+        } else {
+            videoPlayer.volume = 1; volumeSlider.value = 100;
+            volPct.textContent = '100%'; volumeBtn.textContent = '🔊';
+        }
+    }
+
+    // ── Touch swipe ──
+    videoPlayer.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; });
+    videoPlayer.addEventListener('touchmove',  e => { touchEndY  = e.touches[0].clientY; });
+    videoPlayer.addEventListener('touchend', () => {
+        const d = touchStartY - touchEndY;
+        if (Math.abs(d) > 50) {
+            showSwipe(d > 0 ? '▼' : '▲');
+            d > 0 ? nextVideo() : prevVideo();
+        }
+    });
+
+    // ── Mouse wheel ──
+    videoPlayer.addEventListener('wheel', e => {
+        e.preventDefault();
+        if (wheelLock) return;
+        wheelLock = true;
+        setTimeout(() => { wheelLock = false; }, 600);
+        if (e.deltaY > 0) { showSwipe('▼'); nextVideo(); }
+        else               { showSwipe('▲'); prevVideo(); }
+    }, { passive: false });
+
+    function showSwipe(icon) {
+        swipeInd.textContent = icon;
+        swipeInd.classList.add('show');
+        setTimeout(() => swipeInd.classList.remove('show'), 300);
+    }
+
+    // ── Modal ──
+    function openModal()  { modal.classList.add('show'); updateList(); }
+    function closeModal() { modal.classList.remove('show'); }
+
+    function updateList() {
+        document.getElementById('listTitle').textContent = `Danh sách video (${allVideos.length})`;
+        document.getElementById('videoList').innerHTML = allVideos.map(v => `
+            <div class="video-item">
+                <div class="video-item-name">${v.name}</div>
+                <button class="delete-btn" onclick="deleteVideo(${JSON.stringify(v.id)})">×</button>
+            </div>
+        `).join('');
+    }
+
+    async function deleteVideo(id) {
+        await deleteFromDB(id);
+        allVideos  = allVideos.filter(v => v.id !== id);
+        shuffled   = shuffled.filter(v => v.id !== id);
+        if (curIdx >= shuffled.length) curIdx = Math.max(0, shuffled.length - 1);
+        if (!shuffled.length) { hidePlayer(); closeModal(); }
+        else playAt(curIdx);
+        updateList();
+    }
+
+    // ── Backup ──
+    async function backupVideos() {
+        if (!allVideos.length) { alert('Không có video nào để backup!'); return; }
+        const CHUNK = 10;
+        const total = Math.ceil(allVideos.length / CHUNK);
+        if (!confirm(`Bạn có ${allVideos.length} video.\nSẽ tạo ${total} file zip.\nTiếp tục?`)) return;
+
+        closeModal();
+        bpWrap.classList.add('show');
+
+        function setProgress(videoDone, zipPct) {
+            // videoDone: số video đã xong hẳn, zipPct: 0-100 tiến trình nén file hiện tại
+            const basePercent = Math.round((videoDone / allVideos.length) * 100);
+            const chunkSize   = Math.min(CHUNK, allVideos.length - videoDone);
+            const chunkContrib= Math.round((chunkSize / allVideos.length) * zipPct);
+            const pct = Math.min(basePercent + chunkContrib, 99);
+            bpBar.style.width = pct + '%';
+            bpText.textContent = `${videoDone}/${allVideos.length} (${pct}%)`;
         }
 
-        // Save video to IndexedDB
-        async function saveVideoToDB(video) {
-            return new Promise((resolve, reject) => {
-                const transaction = db.transaction([STORE_NAME], 'readwrite');
-                const store = transaction.objectStore(STORE_NAME);
-                const request = store.put(video);
-                
-                request.onsuccess = () => resolve();
-                request.onerror = () => reject(request.error);
-            });
-        }
+        try {
+            for (let i = 0; i < total; i++) {
+                const start = i * CHUNK;
+                const chunk = allVideos.slice(start, start + CHUNK);
 
-        // Load videos from IndexedDB
-        async function loadVideosFromDB() {
-            return new Promise((resolve, reject) => {
-                const transaction = db.transaction([STORE_NAME], 'readonly');
-                const store = transaction.objectStore(STORE_NAME);
-                const request = store.getAll();
-                
-                request.onsuccess = () => {
-                    const videos = request.result.map(v => ({
-                        ...v,
-                        url: URL.createObjectURL(v.blob)
-                    }));
-                    resolve(videos);
-                };
-                request.onerror = () => reject(request.error);
-            });
-        }
-
-        // Delete video from IndexedDB
-        async function deleteVideoFromDB(videoId) {
-            return new Promise((resolve, reject) => {
-                const transaction = db.transaction([STORE_NAME], 'readwrite');
-                const store = transaction.objectStore(STORE_NAME);
-                const request = store.delete(videoId);
-                
-                request.onsuccess = () => resolve();
-                request.onerror = () => reject(request.error);
-            });
-        }
-
-        // Backup videos
-        async function backupVideos() {
-            if (allVideos.length === 0) {
-                alert('Không có video nào để backup!');
-                return;
-            }
-
-            loadingText.textContent = 'Đang tạo backup...';
-            loadingText.style.display = 'block';
-
-            try {
                 const zip = new JSZip();
                 const folder = zip.folder('videos');
+                for (const v of chunk) folder.file(v.name, v.blob);
 
-                // Add all videos to zip
-                for (let i = 0; i < allVideos.length; i++) {
-                    const video = allVideos[i];
-                    folder.file(video.name, video.blob);
-                }
+                const blob = await zip.generateAsync(
+                    { type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } },
+                    ({ percent }) => setProgress(start, percent)   // callback realtime
+                );
 
-                // Generate zip file
-                const content = await zip.generateAsync({ type: 'blob' });
-                
-                // Download zip file
-                const url = URL.createObjectURL(content);
+                const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
-                a.href = url;
-                a.download = `video-reels-backup-${Date.now()}.zip`;
+                a.href = url; a.download = `backup-part${i + 1}-of-${total}.zip`;
                 a.click();
                 URL.revokeObjectURL(url);
 
-                loadingText.style.display = 'none';
-                alert(`✅ Đã backup ${allVideos.length} video thành công!`);
-            } catch (error) {
-                console.error('Backup error:', error);
-                loadingText.style.display = 'none';
-                alert('❌ Lỗi khi tạo backup: ' + error.message);
+                // Cập nhật sau khi xong chunk này
+                setProgress(start + chunk.length, 100);
+                await new Promise(r => setTimeout(r, 1200));
             }
+
+            bpBar.style.width = '100%';
+            bpText.textContent = `${allVideos.length}/${allVideos.length} ✅`;
+            setTimeout(() => { bpWrap.classList.remove('show'); bpBar.style.width = '0%'; }, 3500);
+            alert(`✅ Backup xong ${allVideos.length} video (${total} file)!`);
+        } catch (err) {
+            bpWrap.classList.remove('show');
+            alert('❌ Lỗi backup: ' + err.message);
         }
+    }
 
-        // Restore videos from backup
-        async function restoreVideos(file) {
-            if (!file) return;
+    // ── Restore ──
+    async function handleRestore(file) {
+        if (!file) return;
+        loadingText.style.display = 'block';
+        loadingText.textContent = 'Đang khôi phục...';
+        try {
+            const zip = await new JSZip().loadAsync(file);
+            const entries = Object.entries(zip.files).filter(([n, f]) => !f.dir && n.startsWith('videos/'));
+            if (!entries.length) throw new Error('Không tìm thấy video trong file backup!');
 
-            loadingText.textContent = 'Đang khôi phục backup...';
-            loadingText.style.display = 'block';
-
-            try {
-                const zip = new JSZip();
-                const contents = await zip.loadAsync(file);
-                const videoFiles = [];
-
-                // Extract all video files
-                for (const [filename, fileData] of Object.entries(contents.files)) {
-                    if (!fileData.dir && filename.includes('videos/')) {
-                        const blob = await fileData.async('blob');
-                        const name = filename.replace('videos/', '');
-                        videoFiles.push({ name, blob });
-                    }
-                }
-
-                if (videoFiles.length === 0) {
-                    throw new Error('Không tìm thấy video trong file backup!');
-                }
-
-                // Save to database
-                for (const file of videoFiles) {
-                    const video = {
-                        id: Date.now() + Math.random(),
-                        name: file.name,
-                        blob: file.blob,
-                        url: URL.createObjectURL(file.blob)
-                    };
-                    
-                    allVideos.push(video);
-                    await saveVideoToDB(video);
-                }
-
-                loadingText.style.display = 'none';
-                
-                if (shuffledVideos.length === 0) {
-                    shuffleVideos();
-                    uploadScreen.classList.add('hidden');
-                    videoContainer.classList.remove('hidden');
-                    playCurrentVideo();
-                }
-
-                updateVideoList();
-                closeModal();
-                alert(`✅ Đã khôi phục ${videoFiles.length} video thành công!`);
-            } catch (error) {
-                console.error('Restore error:', error);
-                loadingText.style.display = 'none';
-                alert('❌ Lỗi khi khôi phục: ' + error.message);
-            }
-        }
-
-        // Initialize app
-        async function init() {
-            await initDB();
-            const savedVideos = await loadVideosFromDB();
-            
-            if (savedVideos.length > 0) {
-                allVideos = savedVideos;
-                shuffleVideos();
-                uploadScreen.classList.add('hidden');
-                videoContainer.classList.remove('hidden');
-                playCurrentVideo();
-            }
-        }
-
-        // File input handlers
-        document.getElementById('fileInput').addEventListener('change', handleFileUpload);
-        document.getElementById('fileInputModal').addEventListener('change', handleFileUpload);
-        document.getElementById('restoreInput').addEventListener('change', (e) => {
-            if (e.target.files[0]) {
-                restoreVideos(e.target.files[0]);
-                e.target.value = '';
-            }
-        });
-        document.getElementById('restoreInputModal').addEventListener('change', (e) => {
-            if (e.target.files[0]) {
-                restoreVideos(e.target.files[0]);
-                e.target.value = '';
-            }
-        });
-
-        // Video events
-        videoPlayer.addEventListener('ended', nextVideo);
-        videoPlayer.addEventListener('click', togglePlay);
-
-        // Volume control
-        volumeSlider.addEventListener('input', (e) => {
-            const volume = e.target.value / 100;
-            videoPlayer.volume = volume;
-            volumePercentage.textContent = e.target.value + '%';
-            
-            if (volume === 0) {
-                volumeBtn.textContent = '🔇';
-            } else if (volume < 0.5) {
-                volumeBtn.textContent = '🔉';
-            } else {
-                volumeBtn.textContent = '🔊';
-            }
-        });
-
-        // Touch events for swipe
-        videoPlayer.addEventListener('touchstart', (e) => {
-            touchStartY = e.touches[0].clientY;
-        });
-
-        videoPlayer.addEventListener('touchmove', (e) => {
-            touchEndY = e.touches[0].clientY;
-        });
-
-        videoPlayer.addEventListener('touchend', () => {
-            const swipeDistance = touchStartY - touchEndY;
-            
-            if (Math.abs(swipeDistance) > 50) {
-                if (swipeDistance > 0) {
-                    showSwipeIndicator('▼');
-                    nextVideo();
-                } else {
-                    showSwipeIndicator('▲');
-                    previousVideo();
-                }
-            }
-        });
-
-        // Mouse wheel event
-        videoPlayer.addEventListener('wheel', (e) => {
-            e.preventDefault();
-            
-            if (wheelTimeout) {
-                clearTimeout(wheelTimeout);
-            }
-            
-            wheelTimeout = setTimeout(() => {
-                if (e.deltaY > 0) {
-                    showSwipeIndicator('▼');
-                    nextVideo();
-                } else {
-                    showSwipeIndicator('▲');
-                    previousVideo();
-                }
-            }, 100);
-        }, { passive: false });
-
-        function showSwipeIndicator(icon) {
-            swipeIndicator.textContent = icon;
-            swipeIndicator.classList.add('show');
-            setTimeout(() => {
-                swipeIndicator.classList.remove('show');
-            }, 300);
-        }
-
-        async function handleFileUpload(e) {
-            const files = Array.from(e.target.files);
-            const videoFiles = files.filter(file => file.type.startsWith('video/'));
-            
-            if (videoFiles.length === 0) {
-                alert('Vui lòng chọn ít nhất một file video!');
-                return;
-            }
-
-            loadingText.textContent = 'Đang tải video...';
-            loadingText.style.display = 'block';
-
-            for (const file of videoFiles) {
-                const video = {
-                    id: Date.now() + Math.random(),
-                    name: file.name,
-                    blob: file,
-                    url: URL.createObjectURL(file)
-                };
-                
-                allVideos.push(video);
-                await saveVideoToDB(video);
+            for (const [filename, fileData] of entries) {
+                const blob = await fileData.async('blob');
+                const name = filename.replace('videos/', '');
+                const v = { id: Date.now() + Math.random(), name, blob, url: URL.createObjectURL(blob) };
+                allVideos.push(v);
+                await saveToDB(v);
             }
 
             loadingText.style.display = 'none';
-
-            if (shuffledVideos.length === 0) {
-                shuffleVideos();
-                uploadScreen.classList.add('hidden');
-                videoContainer.classList.remove('hidden');
-                playCurrentVideo();
-            }
-
-            updateVideoList();
-            closeModal();
-            e.target.value = '';
+            if (shuffled.length === 0) { doShuffle(); showPlayer(); playAt(0); }
+            updateList(); closeModal();
+            alert(`✅ Đã khôi phục ${entries.length} video!`);
+        } catch (err) {
+            loadingText.style.display = 'none';
+            alert('❌ Lỗi restore: ' + err.message);
         }
+    }
 
-        function shuffleArray(array) {
-            const shuffled = [...array];
-            for (let i = shuffled.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-            }
-            return shuffled;
-        }
-
-        function shuffleVideos() {
-            shuffledVideos = shuffleArray(allVideos);
-            currentIndex = 0;
-            if (shuffledVideos.length > 0) {
-                playCurrentVideo();
-            }
-            closeModal();
-        }
-
-        function playCurrentVideo() {
-            if (shuffledVideos.length === 0) return;
-
-            const video = shuffledVideos[currentIndex];
-            videoPlayer.src = video.url;
-            videoCount.textContent = `${currentIndex + 1} / ${shuffledVideos.length}`;
-            
-            videoPlayer.play();
-            isPlaying = true;
-            playBtn.textContent = '⏸';
-            playOverlay.classList.remove('show');
-        }
-
-        function togglePlay() {
-            if (isPlaying) {
-                videoPlayer.pause();
-                isPlaying = false;
-                playBtn.textContent = '▶';
-                playOverlay.classList.add('show');
-            } else {
-                videoPlayer.play();
-                isPlaying = true;
-                playBtn.textContent = '⏸';
-                playOverlay.classList.remove('show');
-            }
-        }
-
-        function toggleMute() {
-            if (videoPlayer.volume > 0) {
-                videoPlayer.volume = 0;
-                volumeSlider.value = 0;
-                volumePercentage.textContent = '0%';
-                volumeBtn.textContent = '🔇';
-            } else {
-                videoPlayer.volume = 1;
-                volumeSlider.value = 100;
-                volumePercentage.textContent = '100%';
-                volumeBtn.textContent = '🔊';
-            }
-        }
-
-        function nextVideo() {
-            if (shuffledVideos.length === 0) return;
-            currentIndex = (currentIndex + 1) % shuffledVideos.length;
-            playCurrentVideo();
-        }
-
-        function previousVideo() {
-            if (shuffledVideos.length === 0) return;
-            currentIndex = currentIndex === 0 ? shuffledVideos.length - 1 : currentIndex - 1;
-            playCurrentVideo();
-        }
-
-        function openModal() {
-            modal.classList.add('show');
-            updateVideoList();
-        }
-
-        function closeModal() {
-            modal.classList.remove('show');
-        }
-
-        function updateVideoList() {
-            const listTitle = document.getElementById('listTitle');
-            const videoList = document.getElementById('videoList');
-            
-            listTitle.textContent = `Danh sách video (${allVideos.length})`;
-            
-            videoList.innerHTML = allVideos.map(video => `
-                <div class="video-item">
-                    <div class="video-item-name">${video.name}</div>
-                    <button class="delete-btn" onclick="deleteVideo('${video.id}')">×</button>
-                </div>
-            `).join('');
-        }
-
-        async function deleteVideo(videoId) {
-            await deleteVideoFromDB(videoId);
-            
-            allVideos = allVideos.filter(v => v.id != videoId);
-            shuffledVideos = shuffledVideos.filter(v => v.id != videoId);
-            
-            if (currentIndex >= shuffledVideos.length && shuffledVideos.length > 0) {
-                currentIndex = shuffledVideos.length - 1;
-            }
-            
-            if (shuffledVideos.length === 0) {
-                videoContainer.classList.add('hidden');
-                uploadScreen.classList.remove('hidden');
-                closeModal();
-            } else {
-                playCurrentVideo();
-            }
-            
-            updateVideoList();
-        }
-
-        // Start app
-        init();
-    </script>
+    init();
+</script>
 </body>
 </html>
